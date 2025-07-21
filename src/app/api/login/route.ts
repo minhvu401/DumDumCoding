@@ -1,7 +1,5 @@
-// app/api/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import bcrypt from "bcryptjs";
 import { signToken } from "../../../../lib/jwt";
 
 // Khởi tạo Supabase client
@@ -32,7 +30,10 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error("❌ Lỗi Supabase:", error);
       return NextResponse.json(
-        { error: "Lỗi máy chủ Supabase" },
+        {
+          error: "Lỗi máy chủ Supabase",
+          supabaseError: error.message || error,
+        },
         { status: 500 }
       );
     }
@@ -46,20 +47,13 @@ export async function POST(req: NextRequest) {
 
     const user = users[0];
 
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return NextResponse.json(
-        { error: "Sai tên đăng nhập hoặc mật khẩu" },
-        { status: 401 }
-      );
-    }
-
     // Tạo JWT token
     const token = signToken({
       fullName: user.fullName,
       userName: user.userName,
       role: user.role,
+      avatar: user.avatar || null,
+      user: user.userId,
     });
 
     return NextResponse.json(
@@ -69,6 +63,8 @@ export async function POST(req: NextRequest) {
           fullName: user.fullName,
           userName: user.userName,
           role: user.role,
+          avatar: user.avatar || null,
+          user: user.userId,
         },
       },
       { status: 200 }
