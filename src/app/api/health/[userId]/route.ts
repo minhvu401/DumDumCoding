@@ -7,38 +7,50 @@ const supabase = createClient(
 );
 
 type HealthDataRow = {
+  id: number;
   userId: string;
   date: string;
   weight: number | null;
   sleepHours: number | null;
+  mood: string | null;
   energyLevel: number | null;
-  mood: string;
+  created_at: string;
 };
+
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
-  const userId = params.userId;
+  const paramsResolved = await params;
+  const userId = paramsResolved.userId;
   const today = new Date().toISOString().split("T")[0];
 
   const { data, error } = await supabase
     .from("health_data")
-    .select("*")
-    .eq("userId", userId)
-    .eq("date", today)
-    .single();
+    .select(
+      "id, userId, date, weight, sleepHours, mood, energyLevel, created_at"
+    ) // Chọn các cột khớp schema
+    .eq("userId", userId) // Sử dụng userId như trong schema
+    .eq("date", today);
 
   if (error) {
     console.error("GET error:", error);
     return NextResponse.json(
-      { error: "Không tìm thấy dữ liệu" },
+      { error: "Lỗi khi truy vấn dữ liệu" },
+      { status: 500 }
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return NextResponse.json(
+      { error: "Không tìm thấy dữ liệu cho ngày hôm nay" },
       { status: 404 }
     );
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json(data[0]);
 }
-// Gọi đến AI phân tích
+
 async function analyzeWithAI(data: HealthDataRow, historical: HealthDataRow[]) {
   try {
     const response = await fetch("http://localhost:8000/analyze", {
@@ -46,17 +58,17 @@ async function analyzeWithAI(data: HealthDataRow, historical: HealthDataRow[]) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         data: {
-          user_id: data.userId,
+          userId: data.userId,
           date: data.date,
           weight: data.weight,
-          sleep_hours: data.sleepHours,
+          sleepHours: data.sleepHours,
           mood: data.mood,
-          energy_level: data.energyLevel,
+          energyLevel: data.energyLevel,
         },
         historical_data: historical.map((row) => ({
           weight: row.weight,
-          sleep_hours: row.sleepHours,
-          energy_level: row.energyLevel,
+          sleepHours: row.sleepHours,
+          energyLevel: row.energyLevel,
         })),
       }),
     });
@@ -73,7 +85,6 @@ async function analyzeWithAI(data: HealthDataRow, historical: HealthDataRow[]) {
   }
 }
 
-// API POST - tạo dữ liệu mới
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { userId, date, weight, sleepHours, mood, energyLevel } = body;
@@ -82,12 +93,13 @@ export async function POST(req: NextRequest) {
     .from("health_data")
     .insert([
       {
-        userId: Number(userId),
+        userId, // Không cần Number nếu userId là string
         date,
         weight: weight ? Number(weight) : null,
         sleepHours: sleepHours ? Number(sleepHours) : null,
         mood,
         energyLevel: energyLevel ? Number(energyLevel) : null,
+        created_at: new Date().toISOString(), // Thêm created_at
       },
     ])
     .select()
@@ -98,10 +110,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Lấy lịch sử
   const { data: historicalData, error: histErr } = await supabase
     .from("health_data")
-    .select("*")
+    .select(
+      "id, userId, date, weight, sleepHours, mood, energyLevel, created_at"
+    )
     .eq("userId", userId)
     .order("date", { ascending: false })
     .limit(30);
@@ -113,12 +126,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Gọi AI
   const analysis = await analyzeWithAI(data, historicalData);
   return NextResponse.json({ message: "Thêm thành công", analysis });
 }
 
-// API PUT - cập nhật dữ liệu hiện tại
 export async function PUT(req: NextRequest) {
   const body = await req.json();
   const { userId, date, weight, sleepHours, mood, energyLevel } = body;
@@ -143,7 +154,9 @@ export async function PUT(req: NextRequest) {
 
   const { data: historicalData, error: histErr } = await supabase
     .from("health_data")
-    .select("*")
+    .select(
+      "id, userId, date, weight, sleepHours, mood, energyLevel, created_at"
+    )
     .eq("userId", userId)
     .order("date", { ascending: false })
     .limit(30);
@@ -155,7 +168,6 @@ export async function PUT(req: NextRequest) {
     );
   }
 
-  // Gọi AI
   const analysis = await analyzeWithAI(data, historicalData);
   return NextResponse.json({ message: "Cập nhật thành công", analysis });
 }

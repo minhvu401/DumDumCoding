@@ -10,6 +10,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.6",
+    "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.50.5",
     "bcryptjs": "^3.0.2",
     "js-cookie": "^3.0.5",
@@ -17,12 +19,15 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.525.0",
     "next": "15.3.5",
+    "next-swagger-doc": "^0.4.1",
+    "openai": "^5.10.1",
     "openapi3-ts": "^4.5.0",
     "postgres": "^3.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
-    "swagger-jsdoc": "^6.2.8"
+    "swagger-ui-express": "^5.0.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -34,6 +39,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
     "openapi-types": "^12.1.3",
