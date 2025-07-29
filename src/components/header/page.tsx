@@ -99,30 +99,21 @@ export default function Header() {
               Không gian riêng
             </button>
             {isMenuOpen && (
-              <div className="absolute top-full mt-2 flex flex-col bg-white text-black rounded-md shadow-sm mr-7 z-5 min-w-[176px]">
+              <div className="absolute top-full mt-2 flex flex-col bg-white text-black rounded-md shadow-sm mr-7 z-5 min-w-[157px]">
                 <Link
                   href="/schedule"
-                  className="px-4 py-2 hover:bg-gray-100 hover:rounded-t-md transition"
+                  className="px-4 py-2 rounded-t-md hover:bg-gray-100 hover:rounded-t-md transition"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Lịch học thông minh
+                  Lịch học của bé
                 </Link>
                 <Link
                   href="/health"
-                  className="px-4 py-2 hover:bg-gray-100 transition"
+                  className="px-4 py-2 text-left rounded-b-md hover:bg-gray-100 hover:rounded-b-md transition"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sức khỏe
                 </Link>
-                <button
-                  className="px-4 py-2 text-left hover:bg-gray-100 hover:rounded-b-md transition"
-                  onClick={() => {
-                    handleLogout();
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  Đăng xuất
-                </button>
               </div>
             )}
           </div>
