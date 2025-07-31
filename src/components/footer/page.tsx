@@ -135,7 +135,9 @@ const Footer: React.FC = () => {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <span className="text-white/80 text-sm">Dum Dum's home</span>
+                <span className="text-white/80 text-sm">
+                  Dum Dum&apos;s home
+                </span>
               </div>
               <div className="flex items-center space-x-3">
                 <svg
