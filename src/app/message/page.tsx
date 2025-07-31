@@ -216,18 +216,18 @@ export default function DailyMessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-pink-50 py-6 px-4">
+    <div className="min-h-screen bg-gradient-to-br rounded-2xl from-cyan-100 to-pink-200 py-6 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-cyan-400 to-pink-400 rounded-full mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-cyan-300 to-pink-300 rounded-full mb-4 shadow-lg">
             <MessageCircle className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Lời nhắn dặn dò
           </h1>
           <p className="text-gray-600 text-lg">
-            Tin nhắn yêu thương từ Admin mỗi ngày
+            Tin nhắn yêu thương từ Minh iu mỗi ngày
           </p>
           {currentUser && (
             <div className="mt-4 inline-flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-4 py-2 shadow-md">
@@ -236,7 +236,7 @@ export default function DailyMessagesPage() {
                 {currentUser.fullName}
               </span>
               {unreadCount > 0 && (
-                <span className="bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                <span className="bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded-full">
                   {unreadCount} mới
                 </span>
               )}
@@ -287,11 +287,36 @@ export default function DailyMessagesPage() {
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="border-2 border-pink-200 rounded-lg px-3 py-2 focus:border-pink-400"
               >
-                <option value="all">Tất cả danh mục</option>
-                <option value="general">Chung</option>
-                <option value="health">Sức khỏe</option>
-                <option value="reminder">Nhắc nhở</option>
-                <option value="announcement">Thông báo</option>
+                <option
+                  value="all"
+                  className=" text-cyan-800 border-1 border-pink-200 rounded-lg"
+                >
+                  Tất cả danh mục
+                </option>
+                <option
+                  value="general"
+                  className=" text-cyan-800 border-1 border-pink-200 rounded-lg"
+                >
+                  Chung
+                </option>
+                <option
+                  value="health"
+                  className=" text-cyan-800 border-1 border-pink-200 rounded-lg"
+                >
+                  Sức khỏe
+                </option>
+                <option
+                  value="reminder"
+                  className=" text-cyan-800 border-1 border-pink-200 rounded-lg"
+                >
+                  Nhắc nhở
+                </option>
+                <option
+                  value="announcement"
+                  className=" text-cyan-800 border-1 border-pink-200 rounded-lg"
+                >
+                  Thông báo
+                </option>
               </select>
 
               <button
@@ -325,10 +350,10 @@ export default function DailyMessagesPage() {
             filteredMessages.map((message) => (
               <div
                 key={message.id}
-                className={`bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border transition-all duration-300 hover:shadow-xl ${
+                className={`bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:scale-102 p-6 border transition-all duration-300 hover:shadow-xl cursor-pointer ${
                   message.isRead
                     ? "border-gray-200"
-                    : "border-cyan-300 bg-cyan-50/50"
+                    : "border-cyan-400 border-3 bg-cyan-50"
                 }`}
                 onClick={() => !message.isRead && handleMarkRead(message.id)}
               >

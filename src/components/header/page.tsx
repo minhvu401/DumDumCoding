@@ -83,8 +83,8 @@ export default function Header() {
               width={100}
               height={100}
               className={`cursor-pointer transition-transform duration-[3000ms] ease-in-out 
-                ${animate ? "scale-x-[-1] translate-x-[590px]" : ""} 
-                hover:scale-x-[-1] hover:translate-x-[590px]`}
+                ${animate ? "scale-x-[-1] translate-x-[650px]" : ""} 
+                hover:scale-x-[-1] hover:translate-x-[650px]`}
             />
           </Link>
         </div>
@@ -94,7 +94,7 @@ export default function Header() {
           {/* ✅ Dropdown "Không gian riêng" */}
           <div className="relative" ref={menuRef}>
             <button
-              className="text-bases font-semibold cursor-pointer px-4 py-0 hover:opacity-60 transition"
+              className="text-bases font-semibold cursor-pointer px-4 py-0 hover:opacity-60 transition hover:scale-108"
               onClick={() => setIsMenuOpen((prev) => !prev)}
             >
               Không gian riêng
@@ -120,7 +120,7 @@ export default function Header() {
           </div>
 
           <button
-            className="text-bases font-semibold cursor-pointer"
+            className="text-bases font-semibold cursor-pointer px-4 py-0 hover:opacity-60 transition hover:scale-108"
             onClick={() => router.push("/message")}
           >
             Lời nhắn cho bé
@@ -139,9 +139,9 @@ export default function Header() {
                 <Image
                   src={user.avatar || "/img/default-avatar.png"}
                   alt="Avatar"
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-white shadow-md"
+                  width={45}
+                  height={45}
+                  className="rounded-full border-2 border-white shadow-md cursor-pointer hover:opacity-80 transition hover:scale-120"
                 />
               </button>
 
