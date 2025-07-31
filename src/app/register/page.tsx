@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, Lock, Mail, Phone, UserCircle, Image } from "lucide-react";
+import {
+  User,
+  Lock,
+  Mail,
+  Phone,
+  UserCircle,
+  ArrowLeft,
+  Image,
+} from "lucide-react";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -54,9 +62,9 @@ export default function RegisterPage() {
     <div
       className="flex flex-col items-center justify-start min-h-screen p-5 bg-[url('/img/backgrounddumdum.jpg')]"
       style={{
-        width: "1550px",
-        height: "500px", // Tăng chiều cao để chứa form
-        top: "109px", // Dời form lên trên 200px (từ 109px xuống -90px)
+        width: "1566px",
+        height: "660px",
+        top: "-2px",
         left: "-30px",
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -66,9 +74,9 @@ export default function RegisterPage() {
     >
       <div
         style={{
-          width: "1522px",
-          height: "500px",
-          top: "109px",
+          width: "1566px",
+          height: "660px",
+          top: "-2px",
           left: "-30px",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -255,7 +263,7 @@ export default function RegisterPage() {
                   Tôi đồng ý với{" "}
                   <a
                     href="#"
-                    className="text-cyan-600 hover:text-cyan-500 transition-colors"
+                    className="text-cyan-600 hover:text-cyan-500 hover:font-bold transition-colors"
                   >
                     điều khoản sử dụng
                   </a>
@@ -277,8 +285,15 @@ export default function RegisterPage() {
               </div>
             )}
             {/* Link đến trang login */}
-            <div className="text-center mr-22 mt-3">
-              <p className="text-sm text-gray-700">
+            <div className="text-center mr-0 gap-15 mt-3 flex flex-row items-center">
+              <button
+                className="text-black text-sm flex flex-row items-center gap-2 hover:text-cyan-600 transition-colors cursor-pointer"
+                onClick={() => router.push("/")}
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Về nhà Dúm
+              </button>
+              <p className="text-sm mr-2 text-gray-700">
                 Đã có tài khoản?{" "}
                 <a
                   href="/login"

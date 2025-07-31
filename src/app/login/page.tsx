@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, Lock } from "lucide-react";
+import { User, Lock, ArrowLeft } from "lucide-react";
+
 export default function LoginPage() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -12,24 +13,30 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userName, password }),
-    });
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userName, password }),
+      });
 
-    const result = await res.json();
+      const result = await res.json();
 
-    if (!res.ok) {
-      setError(result.error || "Login failed");
-    } else {
-      setError("");
-      // Có thể lưu thông tin user nếu cần: localStorage, cookie, zustand, etc.
-      // localStorage.setItem('user', JSON.stringify(result.user))
+      if (!res.ok) {
+        setError(result.error || "Login failed");
+      } else {
+        setError("");
 
-      router.push("/"); // chuyển hướng đến trang chủ hoặc dashboard
+        // ✅ Lưu token vào cookie
+        localStorage.setItem("token", result.token);
+
+        router.push("/"); // chuyển hướng đến trang chủ hoặc dashboard
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Đã xảy ra lỗi khi đăng nhập.");
     }
   };
 
@@ -38,27 +45,27 @@ export default function LoginPage() {
       className="flex flex-col items-center justify-start min-h-screen ml-7 p-5 bg-[url('/img/backgrounddumdum.jpg')]"
       style={{
         width: "1522px",
-        height: "500px",
-        top: "109px",
+        height: "900px",
+        top: "-30px",
         left: "-30px",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        position: "absolute", // Cần cho pseudo-element
+        position: "absolute",
       }}
     >
       <div
         style={{
           width: "1522px",
-          height: "500px",
-          top: "109px",
+          height: "900px",
+          top: "-30px",
           left: "-30px",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          opacity: 0.7, // Độ mờ 70%
-          zIndex: 0, // Đặt dưới nội dung
-          pointerEvents: "none", // Không chặn tương tác với nội dung
+          opacity: 0.7,
+          zIndex: 0,
+          pointerEvents: "none",
         }}
       />
       <div
@@ -69,7 +76,7 @@ export default function LoginPage() {
         }}
       >
         <div className="max-w-md mx-auto w-full">
-          <h1 className="text-3xl text-center font-bold text-black mb-5 mr-14">
+          <h1 className="text-3xl text-center font-bold text-black mb-5 mr-1">
             Đăng nhập
           </h1>
           <div className="space-y-6">
@@ -141,12 +148,26 @@ export default function LoginPage() {
                   Quên mật khẩu?
                 </a>
               </div>
+
+              {error && (
+                <p className="text-sm text-red-600 font-medium text-center">
+                  {error}
+                </p>
+              )}
+
               <button
                 type="submit"
                 style={{ cursor: "pointer" }}
                 className="bg-gradient-to-r bg-pink-300 text-white px-4 py-2 rounded-[7px] hover:bg-pink-500 transition"
               >
                 Đăng nhập
+              </button>
+              <button
+                className="text-black text-sm flex flex-row items-center gap-2 hover:text-cyan-600 transition-colors cursor-pointer"
+                onClick={() => router.push("/")}
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Về nhà Dúm
               </button>
             </form>
           </div>

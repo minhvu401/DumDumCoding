@@ -1,6 +1,8 @@
+"use client";
 import React from "react";
-
+import { useRouter } from "next/navigation";
 const Home: React.FC = () => {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-pink-50 to-white">
       {/* Hero Section */}
@@ -62,7 +64,10 @@ const Home: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-pink-100">
+            <div
+              className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-pink-100 hover:cursor-pointer hover:scale-105"
+              onClick={() => router.push("/schedule")}
+            >
               <div className="w-16 h-16 bg-gradient-to-r from-pink-200 to-pink-300 rounded-2xl flex items-center justify-center mb-6">
                 <svg
                   className="w-8 h-8 text-pink-600"
@@ -88,7 +93,10 @@ const Home: React.FC = () => {
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
+            <div
+              className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 hover:cursor-pointer hover:scale-105"
+              onClick={() => router.push("/health")}
+            >
               <div className="w-16 h-16 bg-gradient-to-r from-blue-200 to-blue-300 rounded-2xl flex items-center justify-center mb-6">
                 <svg
                   className="w-8 h-8 text-blue-600"
@@ -114,7 +122,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-pink-100">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-pink-100 hover:cursor-pointer hover:scale-105">
               <div className="w-16 h-16 bg-gradient-to-r from-pink-200 to-blue-200 rounded-2xl flex items-center justify-center mb-6">
                 <svg
                   className="w-8 h-8 text-purple-600"
