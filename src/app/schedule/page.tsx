@@ -444,10 +444,8 @@ export default function SchedulePage() {
         ) : (
           <div className="bg-white rounded-lg p-8 text-center text-gray-500 shadow">
             <div className="text-6xl mb-4">📅</div>
-            <h3 className="text-lg font-semibold mb-2">No tasks scheduled</h3>
-            <p className="text-sm">
-              Add your first task to see the schedule table
-            </p>
+            <h3 className="text-lg font-semibold mb-2">Chưa có nhiệm vụ</h3>
+            <p className="text-sm">Bé hãy tạo nhiệm vụ rồi xem nhé!</p>
           </div>
         )}
 

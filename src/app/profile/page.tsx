@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
@@ -15,6 +15,7 @@ import {
   Shield,
   UserCheck,
 } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
 
 // Define types based on backend API response
 interface ProfileData {
@@ -27,6 +28,11 @@ interface ProfileData {
   status: string;
 }
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,6 +40,7 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -96,16 +103,16 @@ export default function ProfilePage() {
         throw new Error(data.error || "Cập nhật thất bại");
       }
 
-      toast.success("✅ Cập nhật thành công!");
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        setToken(data.token);
+        toast.success("✅ Cập nhật thành công!");
+      } else {
+        toast.success("✅ Cập nhật thành công! Nhưng chưa có token mới!");
+      }
 
-      // Refresh profile data after successful update
-      const refreshRes = await fetch("/api/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (refreshRes.ok) {
-        const refreshedData = await refreshRes.json();
-        setProfile(refreshedData);
+      if (data.user) {
+        setProfile(data.user);
       }
     } catch (error) {
       const errorMessage =
@@ -120,6 +127,33 @@ export default function ProfilePage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (profile) {
       setProfile({ ...profile, [e.target.name]: e.target.value });
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !token || !profile) return;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `avatar_${profile.userId}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast.error("❌ Lỗi khi tải ảnh lên");
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(filePath);
+
+    if (urlData?.publicUrl) {
+      setProfile({ ...profile, avatar: urlData.publicUrl });
+      toast.success("✅ Tải ảnh thành công, bấm lưu để cập nhật!");
     }
   };
 
@@ -189,7 +223,6 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-pink-100">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-blue-400">
             Hồ sơ của bé
@@ -206,7 +239,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Error Display */}
         {error && (
           <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-xl text-red-700 text-center">
             {error}
@@ -214,7 +246,6 @@ export default function ProfilePage() {
         )}
 
         <div className="space-y-6">
-          {/* Avatar Section */}
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <Image
@@ -228,9 +259,20 @@ export default function ProfilePage() {
                   target.src = "/img/default-avatar.png";
                 }}
               />
-              <div className="absolute bottom-0 right-0 bg-pink-400 rounded-full p-2 shadow-lg">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-0 right-0 bg-pink-400 rounded-full p-2 shadow-lg"
+              >
                 <Camera className="w-4 h-4 text-white" />
-              </div>
+              </button>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handleAvatarUpload}
+                hidden
+              />
             </div>
             <div className="w-full max-w-xs">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -247,9 +289,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Form Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Username (Read-only) */}
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <User className="w-4 h-4 text-pink-500" />
@@ -265,7 +305,6 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            {/* Full Name */}
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Họ và tên
@@ -279,7 +318,6 @@ export default function ProfilePage() {
               />
             </div>
 
-            {/* Email (Read-only) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <Mail className="w-4 h-4 text-blue-500" />
@@ -296,7 +334,6 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            {/* Phone Number */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <Phone className="w-4 h-4 text-green-500" />
@@ -314,7 +351,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Update Button */}
         <div className="flex justify-center pt-8">
           <button
             onClick={handleUpdate}
@@ -334,19 +370,18 @@ export default function ProfilePage() {
             )}
           </button>
         </div>
-
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: "rgba(255, 255, 255, 0.9)",
-              backdropFilter: "blur(10px)",
-              color: "#1f2937",
-              fontWeight: "600",
-            },
-          }}
-        />
       </div>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "rgba(255, 255, 255, 0.9)",
+            backdropFilter: "blur(10px)",
+            color: "#1f2937",
+            fontWeight: "600",
+          },
+        }}
+      />
     </div>
   );
 }

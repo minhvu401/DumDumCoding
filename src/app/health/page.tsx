@@ -197,9 +197,12 @@ export default function HealPage() {
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Kiểm tra sức khỏe với AI
           </h1>
-          <p className="text-gray-600 text-lg">
-            Theo dõi và phân tích sức khỏe của bạn một cách thông minh
+          <p className="text-gray-600 text-lg mb-6">
+            Theo dõi và phân tích sức khỏe của Dúm một cách thông minh
           </p>
+          <strong className="text-pink-500 mt-8 text-lg font-semibold">
+            Dúm nhớ cập nhật sức khỏe hằng ngày nhé 😽
+          </strong>
         </div>
 
         {/* Error Display */}
