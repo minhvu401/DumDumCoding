@@ -16,6 +16,7 @@ import {
   Zap,
   Save,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Định nghĩa kiểu dữ liệu
 
@@ -35,10 +36,10 @@ export default function HealPage() {
     id: 0,
     userId: "8",
     date: new Date().toISOString().split("T")[0],
-    weight: 70.0,
-    sleepHours: 7.0,
-    mood: "good",
-    energyLevel: 7,
+    weight: 52.0,
+    sleepHours: 6.0,
+    mood: "Tốt",
+    energyLevel: 8,
     created_at: new Date().toISOString(),
   });
 
@@ -52,6 +53,7 @@ export default function HealPage() {
   );
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -128,6 +130,11 @@ export default function HealPage() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
     const fetchHistoricalData = async () => {
       try {
         const { data, error } = await supabase
@@ -336,7 +343,7 @@ export default function HealPage() {
                 AI Tư vấn
               </h3>
 
-              <p className="text-sky-900 font-semibold mb-6 text-sm leading-relaxed">
+              <p className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-blue-400 to-pink-500 font-semibold mb-6 text-sm leading-relaxed">
                 Dúm hãy sử dụng AI để kiểm tra sức khỏe của mình nhé! Nhớ nhập
                 triệu chứng cụ thể để AI phân tích cho bé
               </p>
@@ -368,7 +375,10 @@ export default function HealPage() {
                     key={data.id}
                     className="text-gray-600 flex flex-col leading-tight"
                   >
-                    <span className="text-[13px] font-medium text-gray-500">
+                    <span
+                      className="text-[13px] mb-0.2 mt-2
+                     font-medium text-gray-500"
+                    >
                       {new Date(data.date).toLocaleDateString("vi-VN", {
                         year: "numeric",
                         month: "2-digit",

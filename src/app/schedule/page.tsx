@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface Todo {
   toDoId: number;
@@ -31,7 +32,7 @@ export default function SchedulePage() {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [error, setError] = useState("");
-
+  const router = useRouter();
   // Postpone modal states
   const [showPostponeModal, setShowPostponeModal] = useState(false);
   const [postponeTodo, setPostponeTodo] = useState<Todo | null>(null);
@@ -86,7 +87,7 @@ export default function SchedulePage() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setError("No token found. Please login first.");
+        router.push("/login");
         return;
       }
 
@@ -256,7 +257,7 @@ export default function SchedulePage() {
     .padStart(2, "0")}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-pink-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br rounded-xl from-cyan-100 to-pink-100 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">

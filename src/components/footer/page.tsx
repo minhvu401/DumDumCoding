@@ -3,15 +3,15 @@ import Link from "next/link";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gradient-to-r from-pink-300 via-cyan-500 to-cyan-400 text-white">
+    <footer className="bg-gradient-to-r from-pink-300 via-cyan-500 to-cyan-300 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-75">
           {/* Company Info */}
           <div className="space-y-4">
             <h3 className="text-2xl font-bold text-white">DUM DUM</h3>
             <p className="text-white/90 text-sm leading-relaxed">
-              Chúng tôi cam kết mang đến những sản phẩm và dịch vụ tốt nhất cho
-              khách hàng với chất lượng cao nhất.
+              Chúng tôi cam kết mang đến những sản phẩm và tình yêu tốt nhất cho
+              em bé với chất lượng cao nhất.
             </p>
           </div>
 
@@ -29,26 +29,26 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
-                  href="/services"
+                  href="/schedule"
                   className="text-white/80 hover:text-white transition-colors duration-200 text-sm"
                 >
-                  Dịch vụ
+                  Lịch làm việc
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/products"
+                  href="/health"
                   className="text-white/80 hover:text-white transition-colors duration-200 text-sm"
                 >
-                  Sản phẩm
+                  Sức khỏe
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/blog"
+                  href="/message"
                   className="text-white/80 hover:text-white transition-colors duration-200 text-sm"
                 >
-                  Blog
+                  Tin tức
                 </Link>
               </li>
               <li>
@@ -57,53 +57,6 @@ const Footer: React.FC = () => {
                   className="text-white/80 hover:text-white transition-colors duration-200 text-sm"
                 >
                   Liên hệ
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-white">Hỗ trợ</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/faq"
-                  className="text-white/80 hover:text-white transition-colors duration-200 text-sm"
-                >
-                  Câu hỏi thường gặp
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/help"
-                  className="text-white/80 hover:text-white transition-colors duration-200 text-sm"
-                >
-                  Trung tâm trợ giúp
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy"
-                  className="text-white/80 hover:text-white transition-colors duration-200 text-sm"
-                >
-                  Chính sách bảo mật
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
-                  className="text-white/80 hover:text-white transition-colors duration-200 text-sm"
-                >
-                  Điều khoản dịch vụ
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/return"
-                  className="text-white/80 hover:text-white transition-colors duration-200 text-sm"
-                >
-                  Chính sách đổi trả
                 </Link>
               </li>
             </ul>
@@ -177,40 +130,15 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Newsletter */}
-        <div className="mt-8 pt-8 border-t border-white/20">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-2">
-                Đăng ký nhận tin tức
-              </h4>
-              <p className="text-white/80 text-sm">
-                Nhận thông tin cập nhật mới nhất về sản phẩm và dịch vụ của
-                chúng tôi
-              </p>
-            </div>
-            <div className="flex space-x-2">
-              <input
-                type="email"
-                placeholder="Nhập email của bạn"
-                className="px-4 py-2 rounded-lg bg-white/10 text-white placeholder-white/60 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 backdrop-blur-sm"
-              />
-              <button className="px-6 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors duration-200 backdrop-blur-sm">
-                Đăng ký
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Copyright */}
         <div className="mt-8 pt-8 border-t border-white/20 text-center">
           <p className="text-white/80 text-sm">
             © 2025 Dum Dum. Tất cả quyền được bảo lưu. | Thiết kế bởi{" "}
             <Link
               href="https://www.facebook.com/MinKy.vuminh/"
-              className="text-white hover:text-white/80 transition-colors duration-200"
+              className="text-lime-200 hover:text-lime-400 transition-colors duration-200"
             >
-              Vũ Minh của Dum
+              Vũ Minh của Dúm
             </Link>
           </p>
         </div>

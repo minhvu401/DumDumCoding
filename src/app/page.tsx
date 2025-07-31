@@ -52,7 +52,7 @@ const Home: React.FC = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-pink-200 rounded-full"></div>
-                <span>Chăm sóc bản thân</span>
+                <span>Lời nhắn hằng ngày</span>
               </div>
             </div>
           </div>
@@ -122,7 +122,10 @@ const Home: React.FC = () => {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-pink-100 hover:cursor-pointer hover:scale-105">
+            <div
+              className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-pink-100 hover:cursor-pointer hover:scale-105"
+              onClick={() => router.push("/message")}
+            >
               <div className="w-16 h-16 bg-gradient-to-r from-pink-200 to-blue-200 rounded-2xl flex items-center justify-center mb-6">
                 <svg
                   className="w-8 h-8 text-purple-600"
@@ -139,11 +142,10 @@ const Home: React.FC = () => {
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                Chăm sóc bản thân
+                Lời nhắn hằng ngày
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                Tạo thói quen tích cực và chăm sóc tinh thần, thể chất một cách
-                toàn diện
+                Nơi giúp bé cảm thấy được yêu thương và quan tâm mỗi ngày.
               </p>
             </div>
           </div>
