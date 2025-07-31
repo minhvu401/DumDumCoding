@@ -22,7 +22,7 @@ export default function CustomSelect({
     <div className="w-full">
       <Listbox value={selected} onChange={(val) => onChange(val.value)}>
         <div className="relative">
-          <Listbox.Button className="relative w-full cursor-pointer rounded-2xl bg-white py-5 pl-4 pr-10 text-left border-2 border-gray-200 focus:border-none focus:ring-2 focus:ring-green-500 sm:text-sm">
+          <Listbox.Button className="relative w-full cursor-pointer rounded-2xl bg-white py-5 pl-4 pr-10 text-left border-2 border-gray-200 focus:border-none focus:ring-2 focus:ring-orange-200 sm:text-sm">
             <span className="block truncate font-bold">{selected.name}</span>
             <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
               <ChevronUpDownIcon className="h-5 w-5 text-gray-400" />

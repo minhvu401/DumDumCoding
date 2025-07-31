@@ -6,6 +6,7 @@ import logo from "../../../assets/cinnamoroll.png";
 import { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/navigation";
 
 // Kiểu dữ liệu user từ token
 interface TokenPayload {
@@ -21,7 +22,7 @@ export default function Header() {
   const [isAvatarOpen, setIsAvatarOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-
+  const router = useRouter();
   // Refs để đóng dropdown khi click ra ngoài
   const avatarRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -118,9 +119,12 @@ export default function Header() {
             )}
           </div>
 
-          <div className="text-bases font-semibold cursor-pointer">
+          <button
+            className="text-bases font-semibold cursor-pointer"
+            onClick={() => router.push("/message")}
+          >
             Lời nhắn cho bé
-          </div>
+          </button>
         </div>
 
         {/* Phải: avatar hoặc login/register */}
