@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -34,6 +33,7 @@ export default function SchedulePage() {
   const [endTime, setEndTime] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
   // Postpone modal states
   const [showPostponeModal, setShowPostponeModal] = useState(false);
   const [postponeTodo, setPostponeTodo] = useState<Todo | null>(null);
@@ -41,52 +41,13 @@ export default function SchedulePage() {
   const [newStartTime, setNewStartTime] = useState("");
   const [newEndTime, setNewEndTime] = useState("");
   const [emailLink] = useState("https://mail.google.com/mail/u/0/#inbox");
-  // Tạo mảng thời gian từ 00:00 đến 23:30 (mỗi 30 phút)
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const timeString = `${hour.toString().padStart(2, "0")}:${minute
-          .toString()
-          .padStart(2, "0")}`;
-        slots.push(timeString);
-      }
-    }
-    return slots;
-  };
 
-  // Lấy chỉ những time slots có tasks
-  const getUsedTimeSlots = () => {
-    const allSlots = generateTimeSlots();
-    const usedSlots = [];
-
-    for (const slot of allSlots) {
-      const tasksInSlot = todos.filter((todo) => {
-        const todoStart = todo.startTime.substring(0, 5);
-        const todoEnd = todo.endTime.substring(0, 5);
-        return todoStart <= slot && slot < todoEnd; // sửa lại slot < todoEnd
-      });
-
-      if (tasksInSlot.length > 0) {
-        usedSlots.push(slot);
-      }
-    }
-
-    return usedSlots;
-  };
-  const roundToNearest30Min = (timeStr: string) => {
-    const [hour, minute] = timeStr.split(":").map(Number);
-    const roundedMinute = minute < 15 ? "00" : minute < 45 ? "30" : "00";
-    const adjustedHour = minute >= 45 ? (hour + 1) % 24 : hour;
-    return `${adjustedHour.toString().padStart(2, "0")}:${roundedMinute}`;
-  };
-
-  // Tìm task trong khoảng thời gian
-  const getTasksForTimeSlot = (slotTime: string) => {
-    return todos.filter((todo) => {
-      const todoStart = todo.startTime.substring(0, 5);
-      const todoEnd = todo.endTime.substring(0, 5);
-      return todoStart <= slotTime && slotTime < todoEnd;
+  // Sắp xếp todos theo thời gian bắt đầu
+  const getSortedTodos = () => {
+    return [...todos].sort((a, b) => {
+      const timeA = a.startTime.substring(0, 5);
+      const timeB = b.startTime.substring(0, 5);
+      return timeA.localeCompare(timeB);
     });
   };
 
@@ -97,11 +58,9 @@ export default function SchedulePage() {
         router.push("/login");
         return;
       }
-
       const res = await fetch(`/api/schedule?date=${date}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.ok) {
         const response = await res.json();
         setTodos(response.todos || []);
@@ -124,7 +83,6 @@ export default function SchedulePage() {
         setError("No token found. Please login first.");
         return;
       }
-
       const res = await fetch("/api/schedule", {
         method: "POST",
         headers: {
@@ -133,7 +91,6 @@ export default function SchedulePage() {
         },
         body: JSON.stringify({ title, description, startTime, endTime, date }),
       });
-
       if (res.ok) {
         setShowForm(false);
         setTitle("");
@@ -159,7 +116,6 @@ export default function SchedulePage() {
         setError("No token found. Please login first.");
         return;
       }
-
       const res = await fetch("/api/schedule", {
         method: "PUT",
         headers: {
@@ -171,7 +127,6 @@ export default function SchedulePage() {
           isCompleted: !currentStatus,
         }),
       });
-
       if (res.ok) {
         setTodos((prevTodos) =>
           prevTodos.map((todo) =>
@@ -209,14 +164,12 @@ export default function SchedulePage() {
 
   const postponeTask = async () => {
     if (!postponeTodo) return;
-
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         setError("No token found. Please login first.");
         return;
       }
-
       const res = await fetch("/api/schedule", {
         method: "PUT",
         headers: {
@@ -232,10 +185,9 @@ export default function SchedulePage() {
           },
         }),
       });
-
       if (res.ok) {
         closePostponeModal();
-        fetchTodos(); // Refresh để cập nhật lại danh sách
+        fetchTodos();
         setError("");
       } else {
         const errorData = await res.json();
@@ -253,7 +205,7 @@ export default function SchedulePage() {
 
   const completedTodos = todos.filter((todo) => todo.isCompleted);
   const incompleteTodos = todos.filter((todo) => !todo.isCompleted);
-  const usedTimeSlots = getUsedTimeSlots();
+  const sortedTodos = getSortedTodos();
 
   // Get minimum date (today)
   const today = new Date().toISOString().split("T")[0];
@@ -280,7 +232,6 @@ export default function SchedulePage() {
               Email của Dúm
             </span>
           </button>
-
           {currentUser && (
             <div className="bg-white rounded-lg p-3 shadow text-sm">
               <div className="font-semibold text-gray-800">
@@ -311,7 +262,7 @@ export default function SchedulePage() {
               />
               <button
                 onClick={() => setShowForm(true)}
-                className=" bg-gradient-to-r from-pink-300 to-cyan-400 text-white px-4 py-2 rounded hover:from-pink-400 hover:to-cyan-500"
+                className="bg-gradient-to-r from-pink-300 to-cyan-400 text-white px-4 py-2 rounded hover:from-pink-400 hover:to-cyan-500"
               >
                 Thêm nhiệm vụ cho bé
               </button>
@@ -330,8 +281,8 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        {/* Schedule Table - Chỉ hiển thị time slots có tasks */}
-        {usedTimeSlots.length > 0 ? (
+        {/* Schedule Table - Hiển thị tất cả tasks theo thứ tự thời gian */}
+        {sortedTodos.length > 0 ? (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -346,113 +297,91 @@ export default function SchedulePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {usedTimeSlots.map((slot, index) => {
-                    const tasksInSlot = getTasksForTimeSlot(slot);
+                  {sortedTodos.map((todo, index) => {
                     const isEvenRow = index % 2 === 0;
-
                     return (
                       <tr
-                        key={slot}
+                        key={todo.toDoId}
                         className={`border-b border-gray-100 ${
                           isEvenRow ? "bg-gray-50" : "bg-white"
                         }`}
                       >
                         <td className="px-4 py-2 text-sm font-medium text-gray-600 border-r border-gray-200 align-top">
-                          {slot}
+                          {todo.startTime.substring(0, 5)} -{" "}
+                          {todo.endTime.substring(0, 5)}
                         </td>
                         <td className="px-4 py-2">
-                          <div className="space-y-2">
-                            {tasksInSlot.map((todo) => {
-                              const isFirstSlot =
-                                slot ===
-                                roundToNearest30Min(
-                                  todo.startTime.substring(0, 5)
-                                );
-
-                              // Chỉ hiển thị task ở time slot đầu tiên
-                              if (!isFirstSlot) return null;
-
-                              return (
-                                <div
-                                  key={todo.toDoId}
-                                  className={`p-2 rounded border-l-4 ${
+                          <div
+                            className={`p-2 rounded border-l-4 ${
+                              todo.isCompleted
+                                ? "bg-green-50 border-l-green-400"
+                                : "bg-cyan-50 border-l-cyan-400"
+                            }`}
+                          >
+                            <div className="flex items-start gap-2">
+                              <button
+                                onClick={() =>
+                                  toggleComplete(todo.toDoId, todo.isCompleted)
+                                }
+                                className={`mt-0.5 w-4 h-4 border-2 rounded flex items-center justify-center flex-shrink-0 ${
+                                  todo.isCompleted
+                                    ? "border-green-400 bg-green-400 hover:bg-green-500"
+                                    : "border-gray-300 hover:border-cyan-400"
+                                }`}
+                              >
+                                {todo.isCompleted && (
+                                  <span className="text-white text-xs">✓</span>
+                                )}
+                              </button>
+                              <div className="flex-1 min-w-0">
+                                <h4
+                                  className={`font-medium text-sm leading-tight ${
                                     todo.isCompleted
-                                      ? "bg-green-50 border-l-green-400"
-                                      : "bg-cyan-50 border-l-cyan-400"
+                                      ? "text-gray-600 line-through"
+                                      : "text-gray-800"
                                   }`}
                                 >
-                                  <div className="flex items-start gap-2">
-                                    <button
-                                      onClick={() =>
-                                        toggleComplete(
-                                          todo.toDoId,
-                                          todo.isCompleted
-                                        )
-                                      }
-                                      className={`mt-0.5 w-4 h-4 border-2 rounded flex items-center justify-center flex-shrink-0 ${
-                                        todo.isCompleted
-                                          ? "border-green-400 bg-green-400 hover:bg-green-500"
-                                          : "border-gray-300 hover:border-cyan-400"
-                                      }`}
-                                    >
-                                      {todo.isCompleted && (
-                                        <span className="text-white text-xs">
-                                          ✓
-                                        </span>
-                                      )}
-                                    </button>
-                                    <div className="flex-1 min-w-0">
-                                      <h4
-                                        className={`font-medium text-sm leading-tight ${
-                                          todo.isCompleted
-                                            ? "text-gray-600 line-through"
-                                            : "text-gray-800"
-                                        }`}
-                                      >
-                                        {todo.title}
-                                      </h4>
-                                      {todo.description && (
-                                        <p
-                                          className={`text-xs mt-1 leading-tight ${
-                                            todo.isCompleted
-                                              ? "text-gray-500 line-through"
-                                              : "text-gray-600"
-                                          }`}
-                                        >
-                                          {todo.description}
-                                        </p>
-                                      )}
-                                      <div className="flex items-center gap-2 mt-1">
-                                        <span
-                                          className={`text-xs px-1.5 py-0.5 rounded ${
-                                            todo.isCompleted
-                                              ? "bg-green-100 text-green-700"
-                                              : "bg-cyan-100 text-cyan-700"
-                                          }`}
-                                        >
-                                          {todo.startTime.substring(0, 5)} -{" "}
-                                          {todo.endTime.substring(0, 5)}
-                                        </span>
-                                        <span className="text-xs text-gray-400">
-                                          Em{" "}
-                                          {todo.isCompleted
-                                            ? "xong rồi nhe hihi"
-                                            : "chưa xong huhu"}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    {!todo.isCompleted && (
-                                      <button
-                                        onClick={() => openPostponeModal(todo)}
-                                        className="ml-2 px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded hover:bg-orange-200 flex-shrink-0"
-                                      >
-                                        Cho bé dời nhe
-                                      </button>
-                                    )}
-                                  </div>
+                                  {todo.title}
+                                </h4>
+                                {todo.description && (
+                                  <p
+                                    className={`text-xs mt-1 leading-tight ${
+                                      todo.isCompleted
+                                        ? "text-gray-500 line-through"
+                                        : "text-gray-600"
+                                    }`}
+                                  >
+                                    {todo.description}
+                                  </p>
+                                )}
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span
+                                    className={`text-xs px-1.5 py-0.5 rounded ${
+                                      todo.isCompleted
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-cyan-100 text-cyan-700"
+                                    }`}
+                                  >
+                                    {todo.startTime.substring(0, 5)} -{" "}
+                                    {todo.endTime.substring(0, 5)}
+                                  </span>
+                                  <span className="text-xs text-gray-400">
+                                    Em{" "}
+                                    {todo.isCompleted
+                                      ? "xong rồi nhe hihi"
+                                      : "chưa xong huhu"}
+                                  </span>
                                 </div>
-                              );
-                            })}
+                              </div>
+                              {!todo.isCompleted && (
+                                <button
+                                  onClick={() => openPostponeModal(todo)}
+                                  className="ml-2 px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded hover:bg-orange-200 flex-shrink-0"
+                                >
+                                  Cho bé dời nhe
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -478,7 +407,6 @@ export default function SchedulePage() {
                 <h3 className="text-lg text-cyan-300 font-bold mb-4">
                   Nhiệm vụ mới của Dúm
                 </h3>
-
                 <input
                   type="text"
                   placeholder="Tên nhiệm vụ"
@@ -486,14 +414,12 @@ export default function SchedulePage() {
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full border border-gray-300 rounded px-3 py-2 mb-3"
                 />
-
                 <textarea
                   placeholder="Mô tả nhiệm vụ"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full border border-gray-300 rounded px-3 py-2 mb-3 h-20"
                 />
-
                 <div className="flex gap-2 mb-4">
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -518,7 +444,6 @@ export default function SchedulePage() {
                     />
                   </div>
                 </div>
-
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowForm(false)}
@@ -538,6 +463,7 @@ export default function SchedulePage() {
             </div>
           </div>
         )}
+
         {showPostponeModal && postponeTodo && (
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="p-[2.5px] bg-gradient-to-r from-pink-300 to-cyan-400 rounded-lg shadow-lg">
@@ -545,7 +471,6 @@ export default function SchedulePage() {
                 <h3 className="text-lg text-cyan-300 font-bold mb-4">
                   Dời nhiệm vụ: {postponeTodo.title}
                 </h3>
-
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Ngày làm
@@ -558,7 +483,6 @@ export default function SchedulePage() {
                     className="w-full border border-gray-300 rounded px-3 py-2"
                   />
                 </div>
-
                 <div className="flex gap-2 mb-4">
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -585,7 +509,6 @@ export default function SchedulePage() {
                     />
                   </div>
                 </div>
-
                 <div className="flex gap-2">
                   <button
                     onClick={closePostponeModal}
@@ -596,7 +519,7 @@ export default function SchedulePage() {
                   <button
                     onClick={postponeTask}
                     disabled={!newDate || !newStartTime || !newEndTime}
-                    className=" bg-orange-400 text-white rounded px-4 py-3 hover:bg-orange-600 disabled:opacity-50"
+                    className="bg-orange-400 text-white rounded px-4 py-3 hover:bg-orange-600 disabled:opacity-50"
                   >
                     Bé dời nhe hihi 😘
                   </button>
