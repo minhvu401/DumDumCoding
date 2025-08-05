@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import Image from "next/image";
+import gmailIcon from "../../../assets/Gmail_icon_(2020).svg.png";
 interface Todo {
   toDoId: number;
   userId: number;
@@ -39,7 +40,7 @@ export default function SchedulePage() {
   const [newDate, setNewDate] = useState("");
   const [newStartTime, setNewStartTime] = useState("");
   const [newEndTime, setNewEndTime] = useState("");
-
+  const [emailLink] = useState("https://mail.google.com/mail/u/0/#inbox");
   // Tạo mảng thời gian từ 00:00 đến 23:30 (mỗi 30 phút)
   const generateTimeSlots = () => {
     const slots = [];
@@ -63,7 +64,7 @@ export default function SchedulePage() {
       const tasksInSlot = todos.filter((todo) => {
         const todoStart = todo.startTime.substring(0, 5);
         const todoEnd = todo.endTime.substring(0, 5);
-        return todoStart <= slot && todoEnd > slot;
+        return todoStart <= slot && slot < todoEnd; // sửa lại slot < todoEnd
       });
 
       if (tasksInSlot.length > 0) {
@@ -73,13 +74,19 @@ export default function SchedulePage() {
 
     return usedSlots;
   };
+  const roundToNearest30Min = (timeStr: string) => {
+    const [hour, minute] = timeStr.split(":").map(Number);
+    const roundedMinute = minute < 15 ? "00" : minute < 45 ? "30" : "00";
+    const adjustedHour = minute >= 45 ? (hour + 1) % 24 : hour;
+    return `${adjustedHour.toString().padStart(2, "0")}:${roundedMinute}`;
+  };
 
   // Tìm task trong khoảng thời gian
   const getTasksForTimeSlot = (slotTime: string) => {
     return todos.filter((todo) => {
       const todoStart = todo.startTime.substring(0, 5);
       const todoEnd = todo.endTime.substring(0, 5);
-      return todoStart <= slotTime && todoEnd > slotTime;
+      return todoStart <= slotTime && slotTime < todoEnd;
     });
   };
 
@@ -264,6 +271,16 @@ export default function SchedulePage() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-400 via-cyan-500 to-cyan-300 text-transparent bg-clip-text">
             Lịch làm việc của bé iu
           </h1>
+          <button
+            className="bg-white px-2 py-5.5 rounded-lg hover:scale-103 shadow text-sm font-semibold mt-5 mb-4 ml-120 cursor-pointer inline-flex items-center gap-2"
+            onClick={() => window.open(emailLink, "_blank")}
+          >
+            <Image src={gmailIcon} alt="Gmail" width={20} height={20} />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-cyan-500 to-cyan-400">
+              Email của Dúm
+            </span>
+          </button>
+
           {currentUser && (
             <div className="bg-white rounded-lg p-3 shadow text-sm">
               <div className="font-semibold text-gray-800">
@@ -347,7 +364,10 @@ export default function SchedulePage() {
                           <div className="space-y-2">
                             {tasksInSlot.map((todo) => {
                               const isFirstSlot =
-                                todo.startTime.substring(0, 5) === slot;
+                                slot ===
+                                roundToNearest30Min(
+                                  todo.startTime.substring(0, 5)
+                                );
 
                               // Chỉ hiển thị task ở time slot đầu tiên
                               if (!isFirstSlot) return null;
