@@ -169,14 +169,18 @@ export default function HealPage() {
       const history = historicalData
         .map(
           (row) =>
-            `Ngày ${row.date}: Cân nặng ${row.weight}kg, Ngủ ${row.sleepHours}h, Năng lượng ${row.energyLevel}`
+            `Ngày ${row.date}: Cân nặng ${row.weight}kg, Ngủ ${row.sleepHours}h, Năng lượng ${row.energyLevel}, Cảm xúc ${row.mood}`
         )
         .join("; ");
 
       const response = await fetch("/api/your-endpoint", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: formData.userId, symptoms, history }),
+        body: JSON.stringify({
+          userId: formData.userId,
+          symptoms,
+          history,
+        }),
       });
 
       if (!response.ok) throw new Error("Lỗi từ AI");
@@ -387,7 +391,7 @@ export default function HealPage() {
                     </span>
                     <span className="font-medium text-[14px] text-gray-700">
                       Cân nặng {data.weight}kg • Giờ ngủ {data.sleepHours}h •
-                      Năng lượng {data.energyLevel}
+                      Năng lượng {data.energyLevel} • Cảm xúc {data.mood}
                     </span>
                   </div>
                 ))}

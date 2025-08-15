@@ -1,19 +1,21 @@
 "use client";
 
 import type React from "react";
-
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
 import {
-  User,
+  Camera,
   Mail,
   Phone,
-  Camera,
   Save,
   Shield,
+  User,
   UserCheck,
+  Eye,
+  EyeOff,
+  Lock,
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 
@@ -39,6 +41,16 @@ export default function ProfilePage() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
+
+  // Password change states
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPwd, setChangingPwd] = useState(false);
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -56,12 +68,10 @@ export default function ProfilePage() {
         const res = await fetch("/api/profile", {
           headers: { Authorization: `Bearer ${storedToken}` },
         });
-
         if (!res.ok) {
           const data = await res.json();
           throw new Error(data.error || "Failed to fetch profile.");
         }
-
         const data = await res.json();
         setProfile(data);
       } catch (err) {
@@ -73,32 +83,31 @@ export default function ProfilePage() {
         setLoading(false);
       }
     };
-
     fetchProfile();
   }, [router]);
 
   const handleUpdate = async () => {
     if (!profile || !token) return;
-
     try {
       setUpdating(true);
       setError(null);
 
+      // NOTE: Server PUT expects FormData in current implementation.
+      const form = new FormData();
+      form.append("fullName", profile.fullName || "");
+      form.append("phoneNumber", profile.phoneNumber || "");
+      // Avatar is already uploaded via Supabase Storage and we pass URL separately on server through PUT handler logic.
+      // If you want to upload file directly via API, attach a File object here.
+
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          fullName: profile.fullName,
-          phoneNumber: profile.phoneNumber,
-          avatar: profile.avatar,
-        }),
+        body: form,
       });
 
       const data = await res.json();
-
       if (!res.ok) {
         throw new Error(data.error || "Cập nhật thất bại");
       }
@@ -126,7 +135,10 @@ export default function ProfilePage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (profile) {
-      setProfile({ ...profile, [e.target.name]: e.target.value });
+      setProfile({
+        ...profile,
+        [e.target.name]: e.target.value,
+      } as ProfileData);
     }
   };
 
@@ -150,7 +162,6 @@ export default function ProfilePage() {
     const { data: urlData } = supabase.storage
       .from("avatars")
       .getPublicUrl(filePath);
-
     if (urlData?.publicUrl) {
       setProfile({ ...profile, avatar: urlData.publicUrl });
       toast.success("✅ Tải ảnh thành công, bấm lưu để cập nhật!");
@@ -178,6 +189,55 @@ export default function ProfilePage() {
         return <Shield className="w-4 h-4" />;
       default:
         return <User className="w-4 h-4" />;
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!token) return;
+
+    // Client-side validations
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      toast.error("❌ Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast.error("❌ Mật khẩu mới phải có ít nhất 8 ký tự");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("❌ Xác nhận mật khẩu không khớp");
+      return;
+    }
+
+    try {
+      setChangingPwd(true);
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          oldPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Đổi mật khẩu thất bại");
+      }
+
+      toast.success("✅ Đổi mật khẩu thành công");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Đổi mật khẩu thất bại";
+      toast.error(`❌ ${message}`);
+    } finally {
+      setChangingPwd(false);
     }
   };
 
@@ -225,7 +285,7 @@ export default function ProfilePage() {
       <div className="max-w-3xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-pink-100">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-blue-400">
-            Hồ sơ của bé
+            {"Hồ sơ của bé"}
           </h1>
           <div className="flex items-center justify-center gap-2">
             <span
@@ -245,6 +305,7 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Profile fields */}
         <div className="space-y-6">
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
@@ -274,9 +335,10 @@ export default function ProfilePage() {
                 hidden
               />
             </div>
+
             <div className="w-full max-w-xs">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                URL ảnh đại diện
+                {"URL ảnh đại diện"}
               </label>
               <input
                 type="url"
@@ -293,7 +355,7 @@ export default function ProfilePage() {
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <User className="w-4 h-4 text-pink-500" />
-                Tên đăng nhập
+                {"Tên đăng nhập"}
               </label>
               <input
                 value={profile.userName}
@@ -301,13 +363,13 @@ export default function ProfilePage() {
                 className="w-full px-4 py-3 rounded-xl border border-pink-200 bg-gray-50 font-medium text-gray-600 cursor-not-allowed"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Tên đăng nhập không thể thay đổi
+                {"Tên đăng nhập không thể thay đổi"}
               </p>
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Họ và tên
+                {"Họ và tên"}
               </label>
               <input
                 name="fullName"
@@ -321,7 +383,7 @@ export default function ProfilePage() {
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <Mail className="w-4 h-4 text-blue-500" />
-                Email
+                {"Email"}
               </label>
               <input
                 type="email"
@@ -330,14 +392,14 @@ export default function ProfilePage() {
                 className="w-full px-4 py-3 rounded-xl border border-pink-200 bg-gray-50 font-medium text-gray-600 cursor-not-allowed"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Email không thể thay đổi
+                {"Email không thể thay đổi"}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <Phone className="w-4 h-4 text-green-500" />
-                Số điện thoại
+                {"Số điện thoại"}
               </label>
               <input
                 type="tel"
@@ -360,17 +422,120 @@ export default function ProfilePage() {
             {updating ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                Đang lưu...
+                {"Đang lưu..."}
               </>
             ) : (
               <>
                 <Save className="w-5 h-5" />
-                Cập nhật hồ sơ
+                {"Cập nhật hồ sơ"}
               </>
             )}
           </button>
         </div>
+
+        {/* ĐỔI MẬT KHẨU */}
+        <div className="mt-10 border-t border-pink-100 pt-8">
+          <div className="mb-4 flex items-center gap-2">
+            <Lock className="w-5 h-5 text-pink-500" />
+            <h2 className="text-xl font-semibold text-gray-800">
+              {"Đổi mật khẩu"}
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Old Password */}
+            <div className="relative">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                {"Mật khẩu cũ"}
+              </label>
+              <input
+                type={showOld ? "text" : "password"}
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                placeholder="Nhập mật khẩu cũ"
+                className="w-full px-4 py-3 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setShowOld((v) => !v)}
+                className="absolute right-3 top-[45px] text-gray-500"
+                aria-label="Hiện/ẩn mật khẩu cũ"
+                title="Hiện/ẩn mật khẩu cũ"
+              >
+                {showOld ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+
+            {/* New Password */}
+            <div className="relative">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                {"Mật khẩu mới"}
+              </label>
+              <input
+                type={showNew ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Ít nhất 8 ký tự"
+                className="w-full px-4 py-3 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew((v) => !v)}
+                className="absolute right-3 top-[45px] text-gray-500"
+                aria-label="Hiện/ẩn mật khẩu mới"
+                title="Hiện/ẩn mật khẩu mới"
+              >
+                {showNew ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="relative">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                {"Xác nhận mật khẩu"}
+              </label>
+              <input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Nhập lại mật khẩu mới"
+                className="w-full px-4 py-3 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((v) => !v)}
+                className="absolute right-3 top-[45px] text-gray-500"
+                aria-label="Hiện/ẩn xác nhận mật khẩu"
+                title="Hiện/ẩn xác nhận mật khẩu"
+              >
+                {showConfirm ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-5 ">
+            <button
+              onClick={handleChangePassword}
+              disabled={changingPwd}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 hover:scale-105 disabled:bg-gray-300 text-white font-semibold shadow transition-colors"
+            >
+              {changingPwd ? "Đang đổi mật khẩu..." : "Đổi mật khẩu"}
+            </button>
+          </div>
+        </div>
       </div>
+
       <Toaster
         position="top-right"
         toastOptions={{

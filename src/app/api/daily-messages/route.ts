@@ -62,12 +62,11 @@ export async function GET(req: NextRequest) {
     if (searchParams.get("date")) {
       query = query.eq("messageDate", date);
     } else {
-      // Lấy tin nhắn từ 7 ngày gần đây
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       query = query.gte(
         "messageDate",
-        sevenDaysAgo.toISOString().split("T")[0]
+        thirtyDaysAgo.toISOString().split("T")[0]
       );
     }
 
