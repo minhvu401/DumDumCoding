@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import { createClient } from "@supabase/supabase-js";
 import { signToken } from "../../../../lib/jwt";
 
@@ -42,7 +43,6 @@ export async function GET(req: NextRequest) {
 
   if (error)
     return NextResponse.json({ error: error.message }, { status: 500 });
-
   return NextResponse.json(data);
 }
 
@@ -58,10 +58,10 @@ export async function PUT(req: NextRequest) {
   const avatarFile = formData.get("avatar") as File | null;
 
   let avatarUrl = user.avatar;
-
   if (avatarFile) {
     const buffer = Buffer.from(await avatarFile.arrayBuffer());
     const filePath = `avatars/${Date.now()}_${avatarFile.name}`;
+
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, buffer, {
@@ -75,7 +75,6 @@ export async function PUT(req: NextRequest) {
     const {
       data: { publicUrl },
     } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
     avatarUrl = publicUrl;
   }
 
@@ -116,3 +115,95 @@ export async function PUT(req: NextRequest) {
     user: updatedUser,
   });
 }
+
+// 🔐 PATCH: Đổi mật khẩu (nhập mật khẩu cũ và mật khẩu mới)
+export async function PATCH(req: NextRequest) {
+  try {
+    const user = getUserFromToken(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const { oldPassword, newPassword } = body as {
+      oldPassword?: string;
+      newPassword?: string;
+    };
+
+    if (!oldPassword || !newPassword) {
+      return NextResponse.json(
+        { error: "Vui lòng nhập đủ mật khẩu cũ và mật khẩu mới" },
+        { status: 400 }
+      );
+    }
+
+    if (newPassword.length < 8) {
+      return NextResponse.json(
+        { error: "Mật khẩu mới phải có ít nhất 8 ký tự" },
+        { status: 400 }
+      );
+    }
+
+    if (oldPassword === newPassword) {
+      return NextResponse.json(
+        { error: "Mật khẩu mới không được trùng với mật khẩu cũ" },
+        { status: 400 }
+      );
+    }
+
+    // Lấy hash mật khẩu hiện tại
+    const { data: account, error: fetchErr } = await supabase
+      .from("account")
+      .select("password")
+      .eq("userName", user.userName)
+      .single();
+
+    if (fetchErr || !account?.password) {
+      return NextResponse.json(
+        { error: "Không tìm thấy tài khoản" },
+        { status: 404 }
+      );
+    }
+
+    // So sánh mật khẩu cũ
+    const isMatch = await bcrypt.compare(
+      oldPassword,
+      account.password as string
+    );
+    if (!isMatch) {
+      return NextResponse.json(
+        { error: "Mật khẩu cũ không đúng" },
+        { status: 400 }
+      );
+    }
+
+    // Hash mật khẩu mới
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Cập nhật mật khẩu
+    const { error: updateErr } = await supabase
+      .from("account")
+      .update({ password: hashedPassword })
+      .eq("userName", user.userName);
+
+    if (updateErr) {
+      return NextResponse.json(
+        { error: "Không thể cập nhật mật khẩu" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ message: "Đổi mật khẩu thành công" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return NextResponse.json(
+      { error: "Đã có lỗi xảy ra khi đổi mật khẩu" },
+      { status: 500 }
+    );
+  }
+}
+
+/*
+Ghi chú bảo mật:
+- API này kiểm tra xác thực người dùng bằng JWT trước khi xử lý, phù hợp với khuyến nghị bảo vệ API Routes của Next.js (xác thực và phân quyền) [^1][^2].
+*/

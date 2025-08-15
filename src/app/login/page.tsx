@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, Lock, ArrowLeft } from "lucide-react";
+import { User, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,13 +118,26 @@ export default function LoginPage() {
                     <Lock className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Mật khẩu"
                     className="block text-black w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all duration-200 bg-gray-50 focus:bg-white placeholder:font-bold"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-[42px] text-gray-500 hover:text-gray-700"
+                    aria-label="Hiện/ẩn mật khẩu"
+                    title="Hiện/ẩn mật khẩu"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
                 </div>
               </div>
               <div className="flex items-center justify-between">
