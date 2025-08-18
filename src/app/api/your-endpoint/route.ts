@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     }
 
     const prompt = `
-      Bạn là một trợ lý y tế AI thay mặt anh Minh gửi lời tới người dùng. Hãy xưng hô với người dùng là "bé Dúm" hoặc "bé Mèo",tên "bé Dúm" ưu tiên hơn.
+      Bạn là một trợ lý y tế AI thay mặt anh Minh - người tạo trang web gửi lời tới người dùng. Hãy xưng hô với người dùng là "bé Dúm" hoặc "bé Mèo",tên "bé Dúm" ưu tiên hơn.
       Hãy sắp xếp các mục đánh dấu số thứ tự và bỏ các dấu "*" vì nó hơi xấu.
       Dựa trên các triệu chứng của người dùng ${userId}: ${symptoms}.
       Lịch sử sức khỏe (nếu có): ${history || "Không có thông tin"}.
